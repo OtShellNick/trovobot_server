@@ -12,7 +12,7 @@ module.exports = {
         origin: '*',
         methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
         use: [cors(), cookieParser()],
-        port: 4112,
+        port: process.env.SERVER_PORT,
         routes: [
             {
                 whiteList: ['auth.*'],
