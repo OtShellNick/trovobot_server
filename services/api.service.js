@@ -2,6 +2,7 @@ const ApiGateway = require("moleculer-web");
 const E = require("moleculer-web").Errors;
 const cors = require('cors');
 const cookieParser = require("cookie-parser");
+const moment = require('moment');
 const {validateToken} = require('../requests/auth');
 
 module.exports = {
@@ -15,6 +16,7 @@ module.exports = {
         port: process.env.SERVER_PORT,
         routes: [
             {
+                path: '/',
                 whiteList: ['auth.*'],
                 bodyParser: {
                     json: true,
@@ -22,8 +24,9 @@ module.exports = {
                 }
             },
             {
+                path: '/user',
                 whiteList: ['user.*'],
-                // authorization: true,
+                authorization: true,
                 bodyParser: {
                     json: true,
                     urlencoded: {extended: true}
@@ -34,11 +37,13 @@ module.exports = {
     methods: {
         authorize: async (ctx, route, req, res) => {
             const {authorization} = req.headers;
+            const now = moment();
 
             if (authorization) {
-                const data = await validateToken(authorization);
-                console.log(data);
+                const {data} = await validateToken(authorization);
+                console.log(data)
                 ctx.meta.access_token = authorization;
+
                 return Promise.resolve(ctx);
             }
 

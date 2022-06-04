@@ -14,4 +14,8 @@ const getUserByAccessToken = async (access_token) => {
     return await knex('user').where({access_token});
 }
 
-module.exports = {createUser, getUserByUserId, getUserByAccessToken};
+const updateUserByUserId = async (userId, data) => {
+    return await knex('user').where('userId', '=', userId).update(data, ['id', 'userId', 'userName', 'nickName', 'email', 'profilePic', 'info', 'channelId', 'access_token', 'token_type', 'expires_in', 'refresh_token', 'role']);
+}
+
+module.exports = {createUser, getUserByUserId, getUserByAccessToken, updateUserByUserId};

@@ -37,6 +37,7 @@
     "moleculer": "^0.14.21",
     "moleculer-repl": "^0.7.1",
     "moleculer-web": "^0.10.4",
+    "moment": "^2.29.3",
     "nats": "^2.7.1",
     "pg": "^8.7.3"
   }

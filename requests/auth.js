@@ -13,4 +13,8 @@ const validateToken = (token) => {
     return Server('get', 'validate', {}, token)
 }
 
-module.exports = {login, validateToken}
+const revokeToken = token => {
+    return Server('post', 'revoke', {access_token: token}, token)
+}
+
+module.exports = {login, validateToken, revokeToken}

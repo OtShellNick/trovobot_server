@@ -4,10 +4,12 @@ module.exports = {
     name: 'user',
     version: 1,
     actions: {
-        me: async (ctx) => {
-            const {access_token} = ctx.meta;
+        me: async ({meta}) => {
+            const {access_token} = meta;
 
-            return await getUserByAccessToken(access_token);
+            const [findedUser] = await getUserByAccessToken(access_token);
+            return findedUser;
         }
-    }
+    },
+
 }

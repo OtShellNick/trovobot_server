@@ -1,7 +1,6 @@
-const {Errors: {MoleculerError}} = require('moleculer');
-const {login} = require('../requests/auth');
+const {login, revokeToken} = require('../requests/auth');
 const {getUserInfo} = require('../requests/user');
-const {createUser, getUserByUserId} = require('../actions/userActions');
+const {createUser, getUserByUserId, updateUserByUserId} = require('../actions/userActions');
 
 module.exports = {
     name: 'auth',
@@ -11,17 +10,32 @@ module.exports = {
             params: {
                 authCode: {type: 'string', optional: false}
             },
-            handler: async ({meta, params}) => {
+            handler: async ({params}) => {
                 console.log(params);
                 const {authCode} = params;
                 const {data: authData} = await login(authCode);
                 const {data: user} = await getUserInfo(authData.access_token);
                 const [findedUser] = await getUserByUserId(user.userId);
 
-                if (findedUser) return findedUser; //TODO verify token && refresh token && update auth data
-                const createdUser = await createUser({...user, ...authData});
+                if (findedUser) {
+                    const [updatedUser] = await updateUserByUserId(findedUser.userId, authData);
 
+                    return updatedUser;
+                } //TODO refresh token
+                const createdUser = await createUser({...user, ...authData});
                 return createdUser;
+            }
+        },
+        logout: {
+            params: {
+                access_token: {type: 'string', optional: false}
+            },
+            handler: async ({params}) => {
+                const {access_token} = params;
+
+                const {data} = await revokeToken(access_token);
+
+                return 'Success'
             }
         }
     },
