@@ -17,4 +17,12 @@ const revokeToken = token => {
     return Server('post', 'revoke', {access_token: token}, token)
 }
 
-module.exports = {login, validateToken, revokeToken}
+const refreshToken = refresh_token => {
+    return Server('post', 'refreshtoken', {
+        client_secret: process.env.SECRET_KEY,
+        grant_type: 'refresh_token',
+        refresh_token
+    })
+}
+
+module.exports = {login, validateToken, revokeToken, refreshToken}

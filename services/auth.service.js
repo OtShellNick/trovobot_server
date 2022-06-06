@@ -1,4 +1,4 @@
-const {login, revokeToken} = require('../requests/auth');
+const {login, revokeToken, refreshToken} = require('../requests/auth');
 const {getUserInfo} = require('../requests/user');
 const {createUser, getUserByUserId, updateUserByUserId} = require('../actions/userActions');
 
@@ -10,7 +10,7 @@ module.exports = {
             params: {
                 authCode: {type: 'string', optional: false}
             },
-            handler: async ({params}) => {
+            handler: async ({params, meta}) => {
                 console.log(params);
                 const {authCode} = params;
                 const {data: authData} = await login(authCode);
@@ -19,10 +19,17 @@ module.exports = {
 
                 if (findedUser) {
                     const [updatedUser] = await updateUserByUserId(findedUser.userId, authData);
+                    meta.user = updatedUser;
+                    setInterval(async () => {
+                        const {data: authData} = await refreshToken(updatedUser.refresh_token);
+                        const [newUser] = await updateUserByUserId(updatedUser.userId, authData);
+                        meta.user = newUser;
+                    }, 2 * 60 * 60 * 1000);
 
                     return updatedUser;
-                } //TODO refresh token
+                }
                 const createdUser = await createUser({...user, ...authData});
+                meta.user = createdUser;
                 return createdUser;
             }
         },
@@ -33,7 +40,7 @@ module.exports = {
             handler: async ({params}) => {
                 const {access_token} = params;
 
-                const {data} = await revokeToken(access_token);
+                await revokeToken(access_token);
 
                 return 'Success'
             }

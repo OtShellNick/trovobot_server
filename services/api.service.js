@@ -1,14 +1,15 @@
 const ApiGateway = require("moleculer-web");
+const SocketIOService = require("moleculer-io");
 const E = require("moleculer-web").Errors;
 const cors = require('cors');
 const cookieParser = require("cookie-parser");
 const moment = require('moment');
-const {validateToken} = require('../requests/auth');
+const {getUserByJwt} = require("../actions/userActions");
 
 module.exports = {
     name: 'api',
     version: 1,
-    mixins: [ApiGateway],
+    mixins: [ApiGateway, SocketIOService],
     settings: {
         origin: '*',
         methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
@@ -32,17 +33,19 @@ module.exports = {
                     urlencoded: {extended: true}
                 }
             }
-        ]
+        ],
+        io: {
+
+        }
     },
     methods: {
         authorize: async (ctx, route, req, res) => {
             const {authorization} = req.headers;
-            const now = moment();
 
             if (authorization) {
-                const {data} = await validateToken(authorization);
-                console.log(data)
-                ctx.meta.access_token = authorization;
+                const [user] = await getUserByJwt(authorization);
+
+                ctx.meta.user = user;
 
                 return Promise.resolve(ctx);
             }
