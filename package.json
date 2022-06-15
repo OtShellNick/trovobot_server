@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "migrate": "knex migrate:latest",
-    "dev": "moleculer-runner --repl --hot services"
+    "dev": "moleculer-runner --repl --hot services",
+    "start": "moleculer-runner --repl services"
   },
   "repository": {
     "type": "git",
