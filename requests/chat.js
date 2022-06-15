@@ -71,16 +71,16 @@ const messagesHandler = (data, socket, access_token) => {
                             chatter = await createChatter({sender_id, nick_name, roles, messages: 1});
                         }
 
-                        const [chatterWithRole] = await getChattersWithRole('Зайчишка болтунишка');
+                        const [chatterWithRole] = await getChattersWithRole('Достоевский');
 
-                        if(chatterWithRole && !chatter.roles.includes('streamer') && chatter.messages + 1 > chatterWithRole.messages) {
-                                await sendChatCommand(access_token, `removerole Зайчишка болтунишка ${chatterWithRole.nick_name}`, 109186413);
-                                const index = chatterWithRole.roles.findIndex(role => role === 'Зайчишка болтунишка');
+                        if(chatterWithRole && chatter.nick_name !== chatterWithRole.nick_name && chatter.roles && !chatter.roles.includes('streamer') && chatter.messages + 1 > chatterWithRole.messages) {
+                                await sendChatCommand(access_token, `removerole Достоевский ${chatterWithRole.nick_name}`, 109186413);
+                                const index = chatterWithRole.roles.findIndex(role => role === 'Достоевский');
                                 chatterWithRole.roles.splice(index, 1);
                                 await updateChatter(chatterWithRole.sender_id, {roles: chatterWithRole.roles});
-                                const {data} = await sendChatCommand(access_token, `addrole Зайчишка болтунишка ${chatter.nick_name}`, 109186413);
+                                const {data} = await sendChatCommand(access_token, `addrole Достоевский ${chatter.nick_name}`, 109186413);
 
-                                if(data.is_success) sendMessage(access_token, `Поздравляем @${chatter.nick_name} с получением титула Зайчишка болтунишка, теперь ты признан самым общительным) @${chatterWithRole.nick_name} теряет лидерство, но вернуть то всегда есть шанс!`);
+                                if(data.is_success) sendMessage(access_token, `Поздравляем @${chatter.nick_name} с получением титула Достоевский, теперь ты признан самым общительным) @${chatterWithRole.nick_name} теряет лидерство, но вернуть то всегда есть шанс!`);
                         }
 
                         await updateChatter(sender_id, {roles, messages: chatter.messages + 1});

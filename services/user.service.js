@@ -8,10 +8,14 @@ module.exports = {
     actions: {
         me: async ({meta}) => {
             const {user} = meta;
-            const {data: authData} = await refreshToken(user.refresh_token);
-            const [newUser] = await updateUserByUserId(user.userId, authData);
-            meta.user = newUser;
-            return newUser;
+            try {
+                const {data: authData} = await refreshToken(user.refresh_token);
+                const [newUser] = await updateUserByUserId(user.userId, authData);
+                meta.user = newUser;
+                return newUser;
+            } catch (e) {
+                console.log('me err', e)
+            }
         },
     },
 
