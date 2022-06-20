@@ -114,4 +114,4 @@ const pingHandler = (sec, socket) => {
     }, sec * 1000);
 }
 
-module.exports = {getChatToken, chat}
+module.exports = {getChatToken, chat, sendChatCommand, sendMessage}

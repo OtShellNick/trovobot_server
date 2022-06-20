@@ -20,11 +20,6 @@ module.exports = {
                 if (findedUser) {
                     const [updatedUser] = await updateUserByUserId(findedUser.userId, authData);
                     meta.user = updatedUser;
-                    setInterval(async () => {
-                        const {data: authData} = await refreshToken(updatedUser.refresh_token);
-                        const [newUser] = await updateUserByUserId(updatedUser.userId, authData);
-                        meta.user = newUser;
-                    }, 2 * 60 * 60 * 1000);
 
                     return updatedUser;
                 }

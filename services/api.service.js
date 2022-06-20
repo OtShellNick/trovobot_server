@@ -26,7 +26,7 @@ module.exports = {
             },
             {
                 path: '/user',
-                whiteList: ['user.*'],
+                whiteList: ['user.*', 'chat.*'],
                 authorization: true,
                 bodyParser: {
                     json: true,
