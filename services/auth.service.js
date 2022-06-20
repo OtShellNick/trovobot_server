@@ -11,21 +11,24 @@ module.exports = {
                 authCode: {type: 'string', optional: false}
             },
             handler: async ({params, meta}) => {
-                console.log(params);
                 const {authCode} = params;
-                const {data: authData} = await login(authCode);
-                const {data: user} = await getUserInfo(authData.access_token);
-                const [findedUser] = await getUserByUserId(user.userId);
+                try {
+                    const {data: authData} = await login(authCode);
+                    const {data: user} = await getUserInfo(authData.access_token);
+                    const [findedUser] = await getUserByUserId(user.userId);
 
-                if (findedUser) {
-                    const [updatedUser] = await updateUserByUserId(findedUser.userId, authData);
-                    meta.user = updatedUser;
+                    if (findedUser) {
+                        const [updatedUser] = await updateUserByUserId(findedUser.userId, authData);
+                        meta.user = updatedUser;
 
-                    return updatedUser;
+                        return updatedUser;
+                    }
+                    const createdUser = await createUser({...user, ...authData});
+                    meta.user = createdUser;
+                    return createdUser;
+                } catch (e) {
+                    console.log('login error', e)
                 }
-                const createdUser = await createUser({...user, ...authData});
-                meta.user = createdUser;
-                return createdUser;
             }
         },
         logout: {
