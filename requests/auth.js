@@ -5,7 +5,7 @@ const login = (code) => {
         client_secret: process.env.SECRET_KEY,
         grant_type: "authorization_code",
         code,
-        redirect_uri: 'http://192.168.31.37:8088/'
+        redirect_uri: 'https://trovo-bot-front.herokuapp.com/'
     })
 };
 
