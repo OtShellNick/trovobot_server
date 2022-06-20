@@ -6,7 +6,7 @@
   "scripts": {
     "migrate": "knex migrate:latest",
     "dev": "moleculer-runner --repl --hot services",
-    "start": "moleculer-runner --repl services"
+    "start": "moleculer-runner --repl --hot services"
   },
   "repository": {
     "type": "git",
