@@ -14,7 +14,7 @@ module.exports = {
         origin: '*',
         methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
         use: [cors(), cookieParser()],
-        port: process.env.SERVER_PORT || 3000,
+        port: process.env.SERVER_PORT,
         routes: [
             {
                 path: '/',

@@ -1,4 +1,5 @@
 const {login, revokeToken, refreshToken} = require('../requests/auth');
+const {Errors: {MoleculerError}} = require('moleculer');
 const {getUserInfo} = require('../requests/user');
 const {createUser, getUserByUserId, updateUserByUserId} = require('../actions/userActions');
 
@@ -27,7 +28,8 @@ module.exports = {
                     meta.user = createdUser;
                     return createdUser;
                 } catch (e) {
-                    console.log('login error', e)
+                    console.log('login error', e);
+                    throw new MoleculerError('Internal server error', 500)
                 }
             }
         },
