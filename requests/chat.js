@@ -27,7 +27,7 @@ const sendChatCommand = (access_token, command, channel_id) => {
         });
 }
 
-const chat = (access_token, oauth_token) => {
+const chat = (access_token, oauth_token, meta) => {
     console.log('access_token', access_token);
     const client = new WebSocketClient('wss://open-chat.trovo.live/chat');
 
@@ -49,7 +49,7 @@ const chat = (access_token, oauth_token) => {
         client.onmessage = (msg => {
             const messages = JSON.parse(msg.data)
 
-            messagesHandler(messages, client, oauth_token);
+            messagesHandler(messages, client, oauth_token, meta);
         });
     });
 
