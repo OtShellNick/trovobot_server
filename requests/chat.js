@@ -26,7 +26,7 @@ const sendChatCommand = (access_token, command, channel_id) => {
         });
 }
 
-const chat = (access_token, oauth_token) => {
+const chat = (access_token, oauth_token, cb) => {
     console.log('access_token', access_token);
     const client = new WebSocketClient();
 
@@ -51,7 +51,12 @@ const chat = (access_token, oauth_token) => {
             const messages = JSON.parse(msg.utf8Data);
 
             messagesHandler(messages, socket, oauth_token);
-        })
+        });
+
+        cb(() => {
+            console.log('disconnected');
+            socket.disconnect()
+        });
     });
 }
 
@@ -114,4 +119,15 @@ const pingHandler = (sec, socket) => {
     }, sec * 1000);
 }
 
-module.exports = {getChatToken, chat, sendChatCommand, sendMessage}
+const chatConnect = async (user) => {
+    try {
+        const {data: {token}} = await getChatToken(user.access_token);
+        chat(user.access_token, token, chatDisconnect);
+    } catch (e) {
+        console.log('error connect to chat', e)
+    }
+}
+
+const chatDisconnect = (off) => off()
+
+module.exports = {getChatToken, chat, sendChatCommand, sendMessage, chatConnect, chatDisconnect}

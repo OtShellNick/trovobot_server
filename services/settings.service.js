@@ -1,5 +1,6 @@
 const {Errors: {MoleculerError}} = require('moleculer');
 const {getSettingsByUserId, updateSettings} = require("../actions/settingsActions");
+const {chatConnect, chatDisconnect} = require("../requests/chat");
 
 module.exports = {
     name: 'settings',
@@ -28,6 +29,8 @@ module.exports = {
 
                 try {
                     const [settings] = await updateSettings(user.userId, {botOn});
+
+                    settings.botOn ? chatConnect(user) : chatDisconnect();
 
                     return settings;
                 } catch (e) {
