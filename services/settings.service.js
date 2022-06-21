@@ -1,5 +1,4 @@
 const {Errors: {MoleculerError}} = require('moleculer');
-const context = require('moleculer-cls');
 const {getSettingsByUserId, updateSettings} = require("../actions/settingsActions");
 const {chatConnect, chatDisconnect} = require("../requests/chat");
 
@@ -27,7 +26,6 @@ module.exports = {
             handler: async ({params, meta}) => {
                 const {user} = meta;
                 const {botOn} = params;
-                console.log('ctx', context.get('client'));
 
                 try {
                     let client = meta.chatClient;

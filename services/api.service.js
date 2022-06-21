@@ -12,7 +12,6 @@ module.exports = {
     mixins: [ApiGateway, SocketIOService],
     settings: {
         origin: '*',
-        middlewares: [context.middleware],
         methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
         use: [cors(), cookieParser()],
         port: process.env.SERVER_PORT,
