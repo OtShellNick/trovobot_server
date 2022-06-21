@@ -8,6 +8,7 @@ const {
 const {} = require('../requests/auth');
 const WebSocketClient = require('websocket').client;
 let interval = 0;
+let socketClient = null;
 
 
 const getChatToken = (access_token) => {
@@ -126,10 +127,10 @@ const chatConnect = async (user) => {
 }
 
 const chatDisconnect = (off = true, socket) => {
-    const client = socket;
+    socketClient = socket;
     if(off) {
         console.log('disconnected')
-        client.close();
+        socketClient.close();
     }
 }
 
