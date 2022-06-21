@@ -41,14 +41,17 @@ module.exports = {
             }
         },
         logout: {
-            params: {
-                access_token: {type: 'string', optional: false}
-            },
-            handler: async ({params}) => {
-                const {access_token} = params;
+            handler: async ({meta}) => {
+                const {user} = meta;
 
-                if(refreshInterval) clearInterval(refreshInterval);
-                await revokeToken(access_token);
+                try {
+                    const [findedUser] = await getUserByUserId(user.userId);
+                    await revokeToken(findedUser.access_token);
+                    if(refreshInterval) clearInterval(refreshInterval);
+                } catch (e) {
+                    console.log('error logout', e);
+                    throw new MoleculerError('Internal server error', 500)
+                }
 
                 return 'Success'
             }
