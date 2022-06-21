@@ -123,12 +123,13 @@ const chatConnect = async (user) => {
         const {data: {token}} = await getChatToken(user.access_token);
         chat(token, user.access_token);
     } catch (e) {
+        console.log('error connect to chat', e);
+
         if(e.data.status === 11714) {
             const {data: authData} = await refreshToken(user.refresh_token);
             const [newUser] = await updateUserByUserId(user.userId, authData);
             chatConnect(newUser);
         }
-        console.log('error connect to chat', e)
     }
 }
 
