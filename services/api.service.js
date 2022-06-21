@@ -10,9 +10,9 @@ module.exports = {
     name: 'api',
     version: 1,
     mixins: [ApiGateway, SocketIOService],
-    middlewares: [context.middleware],
     settings: {
         origin: '*',
+        middlewares: [context.middleware],
         methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
         use: [cors(), cookieParser()],
         port: process.env.SERVER_PORT,
