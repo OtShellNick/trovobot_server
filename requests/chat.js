@@ -52,7 +52,7 @@ const chat = (access_token, oauth_token) => {
         });
     });
 
-    client.on('disconnect', () => {
+    client.onclose = (() => {
         console.log('disconnected');
     })
 }
