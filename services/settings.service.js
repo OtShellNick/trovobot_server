@@ -11,7 +11,7 @@ module.exports = {
 
                 try {
                     const [settings] = await getSettingsByUserId(user.userId);
-                    console.log(settings);
+                    return settings;
                 } catch (e) {
                     console.log('get settings error', e);
                     throw new MoleculerError('Internal server error', 500);
