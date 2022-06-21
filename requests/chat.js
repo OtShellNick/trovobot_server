@@ -48,7 +48,8 @@ const chat = (access_token, oauth_token) => {
         );
 
         client.onmessage = (msg => {
-            console.log(msg)
+            const messages = JSON.parse(msg.data)
+            console.log(messages)
             // const messages = JSON.parse(msg.utf8Data);
             //
             // messagesHandler(messages, client, oauth_token);
