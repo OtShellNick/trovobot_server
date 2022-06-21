@@ -8,7 +8,7 @@ const {
 const {} = require('../requests/auth');
 const WebSocketClient = require('websocket').client;
 let interval = 0;
-let socketClient = null;
+let client = null;
 
 
 const getChatToken = (access_token) => {
@@ -22,14 +22,14 @@ const sendMessage = (access_token, msg) => {
 const sendChatCommand = (access_token, command, channel_id) => {
     return Server('post', 'channels/command', {command, channel_id}, access_token)
         .then(resp => {
-            console.log('resp',resp)
+            console.log('resp', resp)
             return resp
         });
 }
 
 const chat = (access_token, oauth_token, cb) => {
     console.log('access_token', access_token);
-    const client = new WebSocketClient();
+    client = new WebSocketClient();
 
     client.connect('wss://open-chat.trovo.live/chat');
 
@@ -53,8 +53,6 @@ const chat = (access_token, oauth_token, cb) => {
 
             messagesHandler(messages, socket, oauth_token);
         });
-
-        cb(null, client);
     });
 }
 
@@ -62,7 +60,7 @@ const messagesHandler = (data, socket, access_token) => {
     switch (data.type) {
         case 'CHAT':
             const {chats} = data.data;
-            if(chats.length < 50) chats.forEach(async (msgs) => {
+            if (chats.length < 50) chats.forEach(async (msgs) => {
                 const {type, nick_name, sender_id, roles} = msgs;
                 let message = '';
 
@@ -70,20 +68,20 @@ const messagesHandler = (data, socket, access_token) => {
                     case 0:
                         let [chatter] = await getChatterByChatterId(sender_id);
 
-                        if(!chatter) {
+                        if (!chatter) {
                             chatter = await createChatter({sender_id, nick_name, roles, messages: 1});
                         }
 
                         const [chatterWithRole] = await getChattersWithRole('Достоевский');
 
-                        if(chatterWithRole && chatter.nick_name !== chatterWithRole.nick_name && chatter.roles && !chatter.roles.includes('streamer') && chatter.messages + 1 > chatterWithRole.messages) {
-                                await sendChatCommand(access_token, `removerole Достоевский ${chatterWithRole.nick_name}`, 109186413);
-                                const index = chatterWithRole.roles.findIndex(role => role === 'Достоевский');
-                                chatterWithRole.roles.splice(index, 1);
-                                await updateChatter(chatterWithRole.sender_id, {roles: chatterWithRole.roles});
-                                const {data} = await sendChatCommand(access_token, `addrole Достоевский ${chatter.nick_name}`, 109186413);
+                        if (chatterWithRole && chatter.nick_name !== chatterWithRole.nick_name && chatter.roles && !chatter.roles.includes('streamer') && chatter.messages + 1 > chatterWithRole.messages) {
+                            await sendChatCommand(access_token, `removerole Достоевский ${chatterWithRole.nick_name}`, 109186413);
+                            const index = chatterWithRole.roles.findIndex(role => role === 'Достоевский');
+                            chatterWithRole.roles.splice(index, 1);
+                            await updateChatter(chatterWithRole.sender_id, {roles: chatterWithRole.roles});
+                            const {data} = await sendChatCommand(access_token, `addrole Достоевский ${chatter.nick_name}`, 109186413);
 
-                                if(data.is_success) sendMessage(access_token, `Поздравляем @${chatter.nick_name} с получением титула Достоевский, теперь ты признан самым общительным) @${chatterWithRole.nick_name} теряет лидерство, но вернуть то всегда есть шанс!`);
+                            if (data.is_success) sendMessage(access_token, `Поздравляем @${chatter.nick_name} с получением титула Достоевский, теперь ты признан самым общительным) @${chatterWithRole.nick_name} теряет лидерство, но вернуть то всегда есть шанс!`);
                         }
 
                         await updateChatter(sender_id, {roles, messages: chatter.messages + 1});
@@ -120,18 +118,15 @@ const pingHandler = (sec, socket) => {
 const chatConnect = async (user) => {
     try {
         const {data: {token}} = await getChatToken(user.access_token);
-        chat(token, user.access_token, chatDisconnect);
+        chat(token, user.access_token);
     } catch (e) {
         console.log('error connect to chat', e)
     }
 }
 
-const chatDisconnect = (off = true, socket) => {
-    socketClient = socket;
-    if(off) {
-        console.log('disconnected')
-        socketClient.close();
-    }
+const chatDisconnect = () => {
+    console.log('disconnected')
+    client.close();
 }
 
 module.exports = {getChatToken, chat, sendChatCommand, sendMessage, chatConnect, chatDisconnect}
