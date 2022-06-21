@@ -52,10 +52,6 @@ const chat = (access_token, oauth_token) => {
 
             messagesHandler(messages, client, oauth_token);
         });
-
-        setTimeout(() => {
-            client.close();
-        }, 1000 * 60 * 2);
     });
 
     client.onclose = (() => {
