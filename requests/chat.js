@@ -29,40 +29,34 @@ const sendChatCommand = (access_token, command, channel_id) => {
 const chat = (access_token, oauth_token) => {
     console.log('access_token', access_token);
     const client = new WebSocketClient();
-    let socket = null;
 
-    return {
-        connect: () => {
-            client.connect('wss://open-chat.trovo.live/chat');
+    client.connect('wss://open-chat.trovo.live/chat');
 
-            client.on('connect', (s) => {
-                socket = s;
-                socket.send(JSON.stringify({
-                    "type": "AUTH",
-                    "nonce": "erfgthyjuikjmuhngb",
-                    "data": {
-                        "token": access_token
-                    }
-                }));
+    client.on('connect', (socket) => {
+        socket.send(JSON.stringify({
+            "type": "AUTH",
+            "nonce": "erfgthyjuikjmuhngb",
+            "data": {
+                "token": access_token
+            }
+        }));
 
-                socket.send(JSON.stringify({
-                        "type": "PING",
-                        "nonce": "PING_randomstring"
-                    })
-                );
+        socket.send(JSON.stringify({
+                "type": "PING",
+                "nonce": "PING_randomstring"
+            })
+        );
 
-                socket.on('message', msg => {
-                    const messages = JSON.parse(msg.utf8Data);
+        socket.on('message', msg => {
+            const messages = JSON.parse(msg.utf8Data);
 
-                    messagesHandler(messages, socket, oauth_token);
-                });
-            });
-        },
-        disconnect: () => {
-            console.log('disconnected');
-            socket.disconnect();
-        }
-    }
+            messagesHandler(messages, socket, oauth_token);
+        });
+
+        setTimeout(() => {
+            socket.disconnect()
+        }, 1000 * 60 * 2)
+    });
 }
 
 const messagesHandler = (data, socket, access_token) => {
@@ -127,11 +121,7 @@ const pingHandler = (sec, socket) => {
 const chatConnect = async (user) => {
     try {
         const {data: {token}} = await getChatToken(user.access_token);
-        const {connect, disconnect} = chat(token, user.access_token);
-        connect();
-        setTimeout(() => {
-            disconnect()
-        }, 1000 * 60 * 3);
+        chat(token, user.access_token);
     } catch (e) {
         console.log('error connect to chat', e)
     }
