@@ -6,7 +6,7 @@ const {
     getChattersWithMaxMessages, getChattersWithRole
 } = require("../actions/chatActions");
 const {} = require('../requests/auth');
-const WebSocketClient = require('websocket').client;
+const WebSocketClient = require('websocket').w3cwebsocket;
 let interval = 0;
 
 
@@ -28,12 +28,10 @@ const sendChatCommand = (access_token, command, channel_id) => {
 
 const chat = (access_token, oauth_token) => {
     console.log('access_token', access_token);
-    const client = new WebSocketClient();
+    const client = new WebSocketClient('wss://open-chat.trovo.live/chat');
 
-    client.connect('wss://open-chat.trovo.live/chat');
-
-    client.on('connect', (socket) => {
-        socket.send(JSON.stringify({
+    client.onopen = ((socket) => {
+        client.send(JSON.stringify({
             "type": "AUTH",
             "nonce": "erfgthyjuikjmuhngb",
             "data": {
@@ -41,21 +39,17 @@ const chat = (access_token, oauth_token) => {
             }
         }));
 
-        socket.send(JSON.stringify({
+        client.send(JSON.stringify({
                 "type": "PING",
                 "nonce": "PING_randomstring"
             })
         );
 
-        socket.on('message', msg => {
+        client.onmessage = (msg => {
             const messages = JSON.parse(msg.utf8Data);
 
-            messagesHandler(messages, socket, oauth_token);
+            messagesHandler(messages, client, oauth_token);
         });
-
-        setTimeout(() => {
-            socket.disconnect()
-        }, 1000 * 60 * 2)
     });
 
     client.on('disconnect', () => {
