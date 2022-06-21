@@ -1,7 +1,7 @@
 const {login, revokeToken} = require('../requests/auth');
 const {Errors: {MoleculerError}} = require('moleculer');
 const {getUserInfo} = require('../requests/user');
-const {createUser, getUserByUserId, updateUserByUserId} = require('../actions/userActions');
+const {createUser, getUserByUserId, updateUserByUserId, getUserByJwt} = require('../actions/userActions');
 const {refreshTokenHandler} = require('../handlers/userHandler');
 
 let refreshInterval = 0;
@@ -41,11 +41,14 @@ module.exports = {
             }
         },
         logout: {
-            handler: async ({meta}) => {
-                const {user} = meta;
+            params: {
+              jwt: {type: 'string', optional: false}
+            },
+            handler: async ({params}) => {
+                const {jwt} = params;
 
                 try {
-                    const [findedUser] = await getUserByUserId(user.userId);
+                    const [findedUser] = await getUserByJwt(jwt);
                     await revokeToken(findedUser.access_token);
                     if(refreshInterval) clearInterval(refreshInterval);
                 } catch (e) {
