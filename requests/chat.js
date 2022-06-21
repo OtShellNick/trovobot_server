@@ -57,6 +57,10 @@ const chat = (access_token, oauth_token) => {
             socket.disconnect()
         }, 1000 * 60 * 2)
     });
+
+    client.on('disconnect', () => {
+        console.log('disconnected');
+    })
 }
 
 const messagesHandler = (data, socket, access_token) => {
@@ -128,6 +132,7 @@ const chatConnect = async (user) => {
 }
 
 const chatDisconnect = () => {
+    if (interval) clearInterval(interval)
 }
 
 module.exports = {getChatToken, chat, sendChatCommand, sendMessage, chatConnect, chatDisconnect}
