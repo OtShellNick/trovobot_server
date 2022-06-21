@@ -23,14 +23,15 @@ module.exports = {
             params: {
                 botOn: {type: 'boolean', optional: true}
             },
-            handler: async ({params, meta}) => {
+            handler: async ({params, meta}, ctx) => {
                 const {user} = meta;
                 const {botOn} = params;
+                console.log('ctx', ctx)
 
                 try {
                     let client = meta.chatClient;
                     const [settings] = await updateSettings(user.userId, {botOn});
-console.log('meta', meta)
+
                     if(settings.botOn) await chatConnect(user, meta);
                     if(!settings.botOn && client) chatDisconnect(client);
 

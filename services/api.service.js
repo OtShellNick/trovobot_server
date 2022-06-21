@@ -1,5 +1,6 @@
 const ApiGateway = require("moleculer-web");
 const SocketIOService = require("moleculer-io");
+const context = require('moleculer-cls');
 const E = require("moleculer-web").Errors;
 const cors = require('cors');
 const cookieParser = require("cookie-parser");
@@ -9,6 +10,7 @@ module.exports = {
     name: 'api',
     version: 1,
     mixins: [ApiGateway, SocketIOService],
+    middlewares: [context.middleware],
     settings: {
         origin: '*',
         methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
