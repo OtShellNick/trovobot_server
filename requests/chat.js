@@ -121,8 +121,11 @@ const pingHandler = (sec, socket) => {
 const chatConnect = async (user) => {
     try {
         const {data: {token}} = await getChatToken(user.access_token);
-        chat(token, user.access_token);
+        const client = new WebSocketClient('wss://open-chat.trovo.live/chat');
+
+        client.onopen = (event) => console.log(event)
     } catch (e) {
+        console.log('error connect to chat', String(e));
             const {data: authData} = await refreshToken(user.refresh_token);
             const [newUser] = await updateUserByUserId(user.userId, authData);
             chatConnect(newUser);
