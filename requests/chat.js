@@ -29,12 +29,14 @@ const sendChatCommand = (access_token, command, channel_id) => {
 const chat = (access_token, oauth_token) => {
     console.log('access_token', access_token);
     const client = new WebSocketClient();
+    let socket = null;
 
     return {
         connect: () => {
             client.connect('wss://open-chat.trovo.live/chat');
 
-            client.on('connect', (socket) => {
+            client.on('connect', (s) => {
+                socket = s;
                 socket.send(JSON.stringify({
                     "type": "AUTH",
                     "nonce": "erfgthyjuikjmuhngb",
@@ -58,7 +60,7 @@ const chat = (access_token, oauth_token) => {
         },
         disconnect: () => {
             console.log('disconnected');
-            client.close();
+            socket.disconnect();
         }
     }
 }
@@ -129,7 +131,7 @@ const chatConnect = async (user) => {
         connect();
         setTimeout(() => {
             disconnect()
-        }, 3000);
+        }, 1000 * 60 * 3);
     } catch (e) {
         console.log('error connect to chat', e)
     }
