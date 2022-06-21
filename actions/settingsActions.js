@@ -4,4 +4,12 @@ const getSettingsByUserId = async (userId) => {
     return await knex('settings').where({userId});
 };
 
-module.exports = {getSettingsByUserId}
+const updateSettings = async (userId, data) => {
+    return await knex('settings').where({userId}).update(data, ['*']);
+};
+
+const createSettings = async (userId, data) => {
+    return await knex('settings').insert({userId, ...data});
+}
+
+module.exports = {getSettingsByUserId, createSettings, updateSettings}

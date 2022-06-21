@@ -1,5 +1,5 @@
 const {Errors: {MoleculerError}} = require('moleculer');
-const {getSettingsByUserId} = require("../actions/settingsActions");
+const {getSettingsByUserId, updateSettings} = require("../actions/settingsActions");
 
 module.exports = {
     name: 'settings',
@@ -18,6 +18,23 @@ module.exports = {
                 }
             }
         },
+        update: {
+            params: {
+                botOn: {type: 'boolean', optional: true}
+            },
+            handler: async ({params, meta}) => {
+                const {user} = meta;
+                const {botOn} = params;
 
+                try {
+                    const [settings] = await updateSettings(user.userId, {botOn});
+                    console.log(settings);
+                    return settings;
+                } catch (e) {
+                    console.log('error settings update', e);
+                    throw new MoleculerError('Internal server error', 500);
+                }
+            }
+        }
     }
 }

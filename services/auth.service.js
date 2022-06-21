@@ -3,6 +3,7 @@ const {Errors: {MoleculerError}} = require('moleculer');
 const {getUserInfo} = require('../requests/user');
 const {createUser, getUserByUserId, updateUserByUserId, getUserByJwt} = require('../actions/userActions');
 const {refreshTokenHandler} = require('../handlers/userHandler');
+const {createSettings} = require("../actions/settingsActions");
 
 let refreshInterval = 0;
 
@@ -30,6 +31,7 @@ module.exports = {
                     }
 
                     const createdUser = await createUser({...user, ...authData});
+                    await createSettings(createdUser.userId, {botOn: false});
                     refreshTokenHandler(meta, createdUser, refreshInterval)
 
                     meta.user = createdUser;
