@@ -53,10 +53,7 @@ const chat = (access_token, oauth_token, cb) => {
             messagesHandler(messages, socket, oauth_token);
         });
 
-        cb(() => {
-            console.log('disconnected');
-            socket.disconnect()
-        });
+        cb(socket);
     });
 }
 
@@ -128,6 +125,9 @@ const chatConnect = async (user) => {
     }
 }
 
-const chatDisconnect = (off) => off()
+const chatDisconnect = (socket) => {
+    console.log('disconnected')
+    socket.close();
+}
 
 module.exports = {getChatToken, chat, sendChatCommand, sendMessage, chatConnect, chatDisconnect}
