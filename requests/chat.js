@@ -128,7 +128,7 @@ const chatConnect = async (user) => {
                  "type": "AUTH",
                  "nonce": "erfgthyjuikjmuhngb",
                  "data": {
-                     "token": user.access_token
+                     "token": token
                  }
              }))
         }
