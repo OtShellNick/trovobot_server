@@ -49,16 +49,18 @@ const chat = (access_token, oauth_token) => {
 
         client.onmessage = (msg => {
             const messages = JSON.parse(msg.data)
-            console.log(messages)
-            // const messages = JSON.parse(msg.utf8Data);
-            //
-            // messagesHandler(messages, client, oauth_token);
+
+            messagesHandler(messages, client, oauth_token);
         });
+
+        setTimeout(() => {
+            client.close();
+        }, 1000 * 60 * 2);
     });
 
     client.onclose = (() => {
         console.log('disconnected');
-    })
+    });
 }
 
 const messagesHandler = (data, socket, access_token) => {
@@ -133,6 +135,7 @@ const chatConnect = async (user) => {
 }
 
 const chatDisconnect = () => {
+    console.log('interval', interval)
     if (interval) clearInterval(interval)
 }
 
