@@ -132,9 +132,10 @@ const chatConnect = async (user) => {
     }
 }
 
-const chatDisconnect = () => {
+const chatDisconnect = (client) => {
     console.log('interval', interval)
     if (interval) clearInterval(interval)
+    client.close();
 }
 
 module.exports = {getChatToken, chat, sendChatCommand, sendMessage, chatConnect, chatDisconnect}
