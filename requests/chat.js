@@ -9,7 +9,6 @@ const {refreshToken} = require("./auth");
 const {updateUserByUserId} = require("../actions/userActions");
 const {} = require('../requests/auth');
 const WebSocketClient = require('websocket').w3cwebsocket;
-let interval = 0;
 
 
 const getChatToken = (access_token) => {
@@ -61,7 +60,7 @@ const chat = (access_token, oauth_token) => {
     return client;
 }
 
-const messagesHandler = (data, socket, access_token) => {
+const messagesHandler = (data, socket, access_token, meta) => {
     switch (data.type) {
         case 'CHAT':
             const {chats} = data.data;
@@ -104,14 +103,15 @@ const messagesHandler = (data, socket, access_token) => {
         case 'PONG':
             console.log('pong')
             const {gap} = data.data;
-            pingHandler(gap, socket);
+            pingHandler(gap, socket, meta);
             break;
     }
 }
 
-const pingHandler = (sec, socket) => {
+const pingHandler = (sec, socket, meta) => {
+    const {interval} = meta;
     if (interval) clearInterval(interval)
-    interval = setInterval(() => {
+    meta.interval = setInterval(() => {
         socket.send(JSON.stringify({
                 "type": "PING",
                 "nonce": "PING_randomstring"
@@ -120,10 +120,10 @@ const pingHandler = (sec, socket) => {
     }, sec * 1000);
 }
 
-const chatConnect = async (user) => {
+const chatConnect = async (user, meta) => {
     try {
         const {data: {token}} = await getChatToken(user.access_token);
-        return chat(token, user.access_token);
+        meta.chatClient = chat(token, user.access_token, meta);
     } catch (e) {
         console.log('error connect to chat', String(e));
             const {data: authData} = await refreshToken(user.refresh_token);
@@ -132,9 +132,10 @@ const chatConnect = async (user) => {
     }
 }
 
-const chatDisconnect = (client) => {
-    console.log('interval', interval)
-    if (interval) clearInterval(interval)
+const chatDisconnect = (client, meta) => {
+    console.log('interval', meta.interval);
+    if (meta.interval) clearInterval(meta.interval);
+    meta.interval = 0;
     client.close();
 }
 
