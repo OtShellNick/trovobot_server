@@ -31,6 +31,15 @@ module.exports = {
                     json: true,
                     urlencoded: {extended: true}
                 }
+            },
+            {
+                path: '/settings',
+                whiteList: ['settings.*'],
+                authorization: true,
+                bodyParser: {
+                    json: true,
+                    urlencoded: {extended: true}
+                }
             }
         ],
     },
