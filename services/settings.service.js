@@ -30,7 +30,7 @@ module.exports = {
                 try {
                     const [settings] = await updateSettings(user.userId, {botOn});
 
-                    settings.botOn ? await chatConnect(user) : chatDisconnect();
+                    settings.botOn ? await chatConnect(user) : chatDisconnect(true);
 
                     return settings;
                 } catch (e) {
