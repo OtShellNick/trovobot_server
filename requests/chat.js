@@ -124,7 +124,7 @@ const chatConnect = async (user) => {
         const client = new WebSocketClient('wss://open-chat.trovo.live/chat');
 
         client.onopen = (socket) => {
-             socket.send(JSON.stringify({
+             client.send(JSON.stringify({
                  "type": "AUTH",
                  "nonce": "erfgthyjuikjmuhngb",
                  "data": {
