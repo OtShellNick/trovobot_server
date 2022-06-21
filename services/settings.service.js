@@ -26,7 +26,7 @@ module.exports = {
             handler: async ({params, meta}) => {
                 const {user} = meta;
                 const {botOn} = params;
-
+console.log(meta)
                 try {
                     let client = meta.chatClient;
                     const [settings] = await updateSettings(user.userId, {botOn});
