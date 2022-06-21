@@ -123,7 +123,15 @@ const chatConnect = async (user) => {
         const {data: {token}} = await getChatToken(user.access_token);
         const client = new WebSocketClient('wss://open-chat.trovo.live/chat');
 
-        client.onopen = (event) => console.log(event)
+        client.onopen = (socket) => {
+             socket.send(JSON.stringify({
+                 "type": "AUTH",
+                 "nonce": "erfgthyjuikjmuhngb",
+                 "data": {
+                     "token": user.access_token
+                 }
+             }))
+        }
     } catch (e) {
         console.log('error connect to chat', String(e));
             const {data: authData} = await refreshToken(user.refresh_token);
