@@ -131,6 +131,10 @@ const chatConnect = async (user) => {
                      "token": token
                  }
              }))
+        };
+
+        client.onmessage = (msg) => {
+            console.log(msg)
         }
     } catch (e) {
         console.log('error connect to chat', String(e));
