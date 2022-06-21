@@ -48,9 +48,10 @@ const chat = (access_token, oauth_token) => {
         );
 
         client.onmessage = (msg => {
-            const messages = JSON.parse(msg.utf8Data);
-
-            messagesHandler(messages, client, oauth_token);
+            console.log(msg)
+            // const messages = JSON.parse(msg.utf8Data);
+            //
+            // messagesHandler(messages, client, oauth_token);
         });
     });
 
@@ -121,21 +122,7 @@ const pingHandler = (sec, socket) => {
 const chatConnect = async (user) => {
     try {
         const {data: {token}} = await getChatToken(user.access_token);
-        const client = new WebSocketClient('wss://open-chat.trovo.live/chat');
-
-        client.onopen = (socket) => {
-             client.send(JSON.stringify({
-                 "type": "AUTH",
-                 "nonce": "erfgthyjuikjmuhngb",
-                 "data": {
-                     "token": token
-                 }
-             }))
-        };
-
-        client.onmessage = (msg) => {
-            console.log(msg)
-        }
+        chat(token, user.access_token);
     } catch (e) {
         console.log('error connect to chat', String(e));
             const {data: authData} = await refreshToken(user.refresh_token);
