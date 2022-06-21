@@ -3,7 +3,6 @@ const SocketIOService = require("moleculer-io");
 const E = require("moleculer-web").Errors;
 const cors = require('cors');
 const cookieParser = require("cookie-parser");
-const moment = require('moment');
 const {getUserByJwt} = require("../actions/userActions");
 
 module.exports = {
@@ -34,12 +33,9 @@ module.exports = {
                 }
             }
         ],
-        io: {
-
-        }
     },
     methods: {
-        authorize: async (ctx, route, req, res) => {
+        authorize: async (ctx, route, req) => {
             const {authorization} = req.headers;
 
             if (authorization) {

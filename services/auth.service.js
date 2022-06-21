@@ -1,7 +1,10 @@
-const {login, revokeToken, refreshToken} = require('../requests/auth');
+const {login, revokeToken} = require('../requests/auth');
 const {Errors: {MoleculerError}} = require('moleculer');
 const {getUserInfo} = require('../requests/user');
 const {createUser, getUserByUserId, updateUserByUserId} = require('../actions/userActions');
+const {refreshTokenHandler} = require('../handlers/userHandler');
+
+let refreshInterval = 0;
 
 module.exports = {
     name: 'auth',
@@ -22,9 +25,13 @@ module.exports = {
                         const [updatedUser] = await updateUserByUserId(findedUser.userId, authData);
                         meta.user = updatedUser;
 
+                        refreshTokenHandler(meta, updatedUser, refreshInterval);
                         return updatedUser;
                     }
+
                     const createdUser = await createUser({...user, ...authData});
+                    refreshTokenHandler(meta, createdUser, refreshInterval)
+
                     meta.user = createdUser;
                     return createdUser;
                 } catch (e) {
@@ -40,6 +47,7 @@ module.exports = {
             handler: async ({params}) => {
                 const {access_token} = params;
 
+                if(refreshInterval) clearInterval(refreshInterval);
                 await revokeToken(access_token);
 
                 return 'Success'
