@@ -5,6 +5,8 @@ const {
     updateChatter,
     getChattersWithMaxMessages, getChattersWithRole
 } = require("../actions/chatActions");
+const {refreshToken} = require("./auth");
+const {updateUserByUserId} = require("../actions/userActions");
 const {} = require('../requests/auth');
 const WebSocketClient = require('websocket').w3cwebsocket;
 let interval = 0;
@@ -121,6 +123,11 @@ const chatConnect = async (user) => {
         const {data: {token}} = await getChatToken(user.access_token);
         chat(token, user.access_token);
     } catch (e) {
+        if(e.data.status === 11714) {
+            const {data: authData} = await refreshToken(user.refresh_token);
+            const [newUser] = await updateUserByUserId(user.userId, authData);
+            chatConnect(newUser);
+        }
         console.log('error connect to chat', e)
     }
 }
