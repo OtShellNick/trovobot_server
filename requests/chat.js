@@ -62,7 +62,7 @@ const messagesHandler = (data, socket, access_token) => {
     switch (data.type) {
         case 'CHAT':
             const {chats} = data.data;
-            chats.forEach(async (msgs) => {
+            if(chats.length < 50) chats.forEach(async (msgs) => {
                 const {type, nick_name, sender_id, roles} = msgs;
                 let message = '';
 
