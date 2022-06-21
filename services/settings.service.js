@@ -28,9 +28,11 @@ module.exports = {
                 const {botOn} = params;
 
                 try {
+                    let client = null
                     const [settings] = await updateSettings(user.userId, {botOn});
 
-                    settings.botOn ? await chatConnect(user) : chatDisconnect();
+                    if(settings.botOn) client = await chatConnect(user);
+                    if(!settings.botOn && client) chatDisconnect();
 
                     return settings;
                 } catch (e) {

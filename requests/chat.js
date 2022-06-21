@@ -57,6 +57,8 @@ const chat = (access_token, oauth_token) => {
     client.onclose = (() => {
         console.log('disconnected');
     });
+
+    return client;
 }
 
 const messagesHandler = (data, socket, access_token) => {
@@ -121,7 +123,7 @@ const pingHandler = (sec, socket) => {
 const chatConnect = async (user) => {
     try {
         const {data: {token}} = await getChatToken(user.access_token);
-        chat(token, user.access_token);
+        return chat(token, user.access_token);
     } catch (e) {
         console.log('error connect to chat', String(e));
             const {data: authData} = await refreshToken(user.refresh_token);
