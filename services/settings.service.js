@@ -10,7 +10,7 @@ module.exports = {
                 const {user} = meta;
 
                 try {
-                    const [settings] = getSettingsByUserId(user.userId);
+                    const settings = getSettingsByUserId(user.userId);
                     console.log(settings);
                 } catch (e) {
                     console.log('get settings error', e);
