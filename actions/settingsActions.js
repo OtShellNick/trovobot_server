@@ -5,7 +5,7 @@ const getSettingsByUserId = async (userId) => {
 };
 
 const updateSettings = async (userId, data) => {
-    return await knex('settings').where({userId}).update(data, ['*']);
+    return await knex('settings').where({userId}).update(data, ['id', 'userId', 'botOn']);
 };
 
 const createSettings = async (userId, data) => {

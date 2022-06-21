@@ -28,7 +28,7 @@ module.exports = {
 
                 try {
                     const [settings] = await updateSettings(user.userId, {botOn});
-                    console.log(settings);
+
                     return settings;
                 } catch (e) {
                     console.log('error settings update', e);
