@@ -1,4 +1,5 @@
 const {Server} = require('../helpers/server');
+const context = require('moleculer-cls');
 const {
     getChatterByChatterId,
     createChatter,
@@ -57,6 +58,7 @@ const chat = (access_token, oauth_token, meta) => {
         console.log('disconnected');
     });
 
+    context.set('client', client);
     return client;
 }
 
