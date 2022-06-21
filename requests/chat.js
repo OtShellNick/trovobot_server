@@ -122,7 +122,7 @@ const pingHandler = (sec, socket) => {
 const chatConnect = async (user) => {
     try {
         const {data: {token}} = await getChatToken(user.access_token);
-        chat(user.access_token, token, chatDisconnect);
+        chat(token, user.access_token, chatDisconnect);
     } catch (e) {
         console.log('error connect to chat', e)
     }
