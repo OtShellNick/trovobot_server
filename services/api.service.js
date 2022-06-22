@@ -17,7 +17,7 @@ module.exports = {
         port: process.env.SERVER_PORT,
         routes: [
             {
-                path: '/',
+                path: '/trovo/',
                 whiteList: ['auth.*'],
                 bodyParser: {
                     json: true,
@@ -25,7 +25,7 @@ module.exports = {
                 }
             },
             {
-                path: '/user',
+                path: '/trovo/user',
                 whiteList: ['user.*', 'chat.*'],
                 authorization: true,
                 bodyParser: {
@@ -34,7 +34,7 @@ module.exports = {
                 }
             },
             {
-                path: '/settings',
+                path: '/trovo/settings',
                 whiteList: ['settings.*'],
                 authorization: true,
                 bodyParser: {
