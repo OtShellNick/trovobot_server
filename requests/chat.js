@@ -8,6 +8,7 @@ const {refreshToken} = require("./auth");
 const {updateUserByUserId} = require("../actions/userActions");
 const WebSocketClient = require('websocket').w3cwebsocket;
 let interval = 0;
+const map = new Map();
 
 const getChatToken = (access_token) => {
     return Server('get', 'chat/token', {}, access_token)
@@ -25,11 +26,12 @@ const sendChatCommand = (access_token, command, channel_id) => {
         });
 }
 
-const chat = (access_token, oauth_token) => {
-    console.log('access_token', access_token);
+const chat = (access_token, user) => {
+    const {access_token: oauth_token, userId} = user;
+
     const client = new WebSocketClient('wss://open-chat.trovo.live/chat');
 
-    client.onopen = ((socket) => {
+    client.onopen = (() => {
         client.send(JSON.stringify({
             "type": "AUTH",
             "nonce": "erfgthyjuikjmuhngb",
@@ -37,6 +39,8 @@ const chat = (access_token, oauth_token) => {
                 "token": access_token
             }
         }));
+
+        map.set(userId, client);
 
         client.send(JSON.stringify({
                 "type": "PING",
@@ -54,8 +58,6 @@ const chat = (access_token, oauth_token) => {
     client.onclose = (() => {
         console.log('disconnected');
     });
-
-    return client;
 }
 
 const messagesHandler = (data, socket, access_token) => {
@@ -117,11 +119,11 @@ const pingHandler = (sec, socket) => {
     }, sec * 1000);
 }
 
-const chatConnect = async (user, meta) => {
-    meta.$test = 'test';
+const chatConnect = async (user) => {
+
     try {
         const {data: {token}} = await getChatToken(user.access_token);
-        const client = chat(token, user.access_token);
+        chat(token, user);
     } catch (e) {
         console.log('error connect to chat', String(e));
             const {data: authData} = await refreshToken(user.refresh_token);
@@ -130,11 +132,11 @@ const chatConnect = async (user, meta) => {
     }
 }
 
-const chatDisconnect = (client) => {
-    console.log('interval', interval);
+const chatDisconnect = (user) => {
     if (interval) clearInterval(interval);
-    interval = 0;
+    const  client = map.get(user.userId);
     client.close();
+    interval = 0;
 }
 
 module.exports = {getChatToken, chat, sendChatCommand, sendMessage, chatConnect, chatDisconnect}

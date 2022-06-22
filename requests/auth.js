@@ -1,11 +1,14 @@
 const {Server} = require('../helpers/server');
+const {config} = require('../config');
+
+const {mode} = process.env;
 
 const login = (code) => {
     return Server('post', 'exchangetoken', {
         client_secret: process.env.SECRET_KEY,
         grant_type: "authorization_code",
         code,
-        redirect_uri: 'https://trovo-bot-front.herokuapp.com/'
+        redirect_uri: config[mode].rest
     })
 };
 
