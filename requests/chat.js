@@ -21,13 +21,13 @@ const sendMessage = (access_token, msg) => {
 const sendChatCommand = (access_token, command, channel_id) => {
     return Server('post', 'channels/command', {command, channel_id}, access_token)
         .then(resp => {
-            console.log('resp',resp)
+            console.log('resp', resp)
             return resp
         });
 }
 
 const chat = (access_token, user) => {
-    const {access_token: oauth_token, userId} = user;
+    const {userId} = user;
 
     const client = new WebSocketClient('wss://open-chat.trovo.live/chat');
 
@@ -51,7 +51,7 @@ const chat = (access_token, user) => {
         client.onmessage = (msg => {
             const messages = JSON.parse(msg.data)
 
-            messagesHandler(messages, client, oauth_token);
+            messagesHandler(messages, client, user);
         });
     });
 
@@ -60,11 +60,12 @@ const chat = (access_token, user) => {
     });
 }
 
-const messagesHandler = (data, socket, access_token) => {
+const messagesHandler = (data, socket, user) => {
+    const {access_token, refresh_token, userId} = user;
     switch (data.type) {
         case 'CHAT':
             const {chats} = data.data;
-            if(chats.length < 50) chats.forEach(async (msgs) => {
+            if (chats.length < 50) chats.forEach(async (msgs) => {
                 const {type, nick_name, sender_id, roles} = msgs;
                 let message = '';
 
@@ -72,31 +73,54 @@ const messagesHandler = (data, socket, access_token) => {
                     case 0:
                         let [chatter] = await getChatterByChatterId(sender_id);
 
-                        if(!chatter) {
+                        if (!chatter) {
                             chatter = await createChatter({sender_id, nick_name, roles, messages: 1});
                         }
 
                         const [chatterWithRole] = await getChattersWithRole('Достоевский');
 
-                        if(chatterWithRole && chatter.nick_name !== chatterWithRole.nick_name && chatter.roles && !chatter.roles.includes('streamer') && chatter.messages + 1 > chatterWithRole.messages) {
+                        if (chatterWithRole && chatter.nick_name !== chatterWithRole.nick_name && chatter.roles && !chatter.roles.includes('streamer') && chatter.messages + 1 > chatterWithRole.messages) {
+                            try {
                                 await sendChatCommand(access_token, `removerole Достоевский ${chatterWithRole.nick_name}`, 109186413);
                                 const index = chatterWithRole.roles.findIndex(role => role === 'Достоевский');
                                 chatterWithRole.roles.splice(index, 1);
                                 await updateChatter(chatterWithRole.sender_id, {roles: chatterWithRole.roles});
                                 const {data} = await sendChatCommand(access_token, `addrole Достоевский ${chatter.nick_name}`, 109186413);
 
-                                if(data.is_success) sendMessage(access_token, `Поздравляем @${chatter.nick_name} с получением титула Достоевский, теперь ты признан самым общительным) @${chatterWithRole.nick_name} теряет лидерство, но вернуть то всегда есть шанс!`);
+                                if (data.is_success) sendMessage(access_token, `Поздравляем @${chatter.nick_name} с получением титула Достоевский, теперь ты признан самым общительным) @${chatterWithRole.nick_name} теряет лидерство, но вернуть то всегда есть шанс!`);
+                            } catch (e) {
+                                console.log('error send role message', e);
+                                const {data: authData} = await refreshToken(refresh_token);
+                                const [newUser] = await updateUserByUserId(userId, authData);
+                                chatRestart(newUser);
+                            }
                         }
 
                         await updateChatter(sender_id, {roles, messages: chatter.messages + 1});
                         break;
                     case 5004:
                         message = `@${nick_name} добро пожаловать на канал! :shocked Устраивайся по удобнее, приятного просмотра)`
-                        sendMessage(access_token, message);
+                        try {
+                            await sendMessage(access_token, message);
+                        } catch (e) {
+                            console.log('error send welcome message', e);
+                            const {data: authData} = await refreshToken(refresh_token);
+                            const [newUser] = await updateUserByUserId(userId, authData);
+                            await sendMessage(newUser.access_token, message);
+                            chatRestart(newUser);
+                        }
                         break;
                     case 5003:
                         message = `@${nick_name} спасибо за подписку! :purpleheart Добро пожаловать в семью!`
-                        sendMessage(access_token, message);
+                        try {
+                            sendMessage(access_token, message);
+                        } catch (e) {
+                            console.log('error send follow message', e);
+                            const {data: authData} = await refreshToken(refresh_token);
+                            const [newUser] = await updateUserByUserId(userId, authData);
+                            await sendMessage(newUser.access_token, message);
+                            chatRestart(newUser);
+                        }
                 }
             });
             break;
@@ -126,17 +150,22 @@ const chatConnect = async (user) => {
         chat(token, user);
     } catch (e) {
         console.log('error connect to chat', String(e));
-            const {data: authData} = await refreshToken(user.refresh_token);
-            const [newUser] = await updateUserByUserId(user.userId, authData);
-            chatConnect(newUser);
+        const {data: authData} = await refreshToken(user.refresh_token);
+        const [newUser] = await updateUserByUserId(user.userId, authData);
+        chatConnect(newUser);
     }
 }
 
 const chatDisconnect = (user) => {
     if (interval) clearInterval(interval);
-    const  client = map.get(user.userId);
+    const client = map.get(user.userId);
     client.close();
     interval = 0;
+}
+
+const chatRestart = (user) => {
+    chatDisconnect(user);
+    chatConnect(user);
 }
 
 module.exports = {getChatToken, chat, sendChatCommand, sendMessage, chatConnect, chatDisconnect}
