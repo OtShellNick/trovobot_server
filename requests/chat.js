@@ -144,7 +144,6 @@ const pingHandler = (sec, socket) => {
 }
 
 const chatConnect = async (user) => {
-
     try {
         const {data: {token}} = await getChatToken(user.access_token);
         chat(token, user);
@@ -157,9 +156,9 @@ const chatConnect = async (user) => {
 }
 
 const chatDisconnect = (user) => {
-    if (interval) clearInterval(interval);
     const client = map.get(user.userId);
-    client.close();
+    if (interval) clearInterval(interval);
+    if(client) client.close();
     interval = 0;
 }
 
