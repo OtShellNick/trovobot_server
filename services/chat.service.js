@@ -1,5 +1,4 @@
 const {getChatToken, chat, sendChatCommand, sendMessage} = require('../requests/chat');
-const {getUserByJwt} = require("../actions/userActions");
 const {getChatterByChatterId, createChatter, getChattersWithRole, updateChatter} = require("../actions/chatActions");
 
 module.exports = {
@@ -11,8 +10,8 @@ module.exports = {
                 access_token: {type: 'string', optional: false}
             },
             handler: async ({params, meta}) => {
-                const {access_token} = params;
-                const [user] = await getUserByJwt(access_token);
+                const {user} = meta;
+
 
                 const {data} = await getChatToken(user.access_token);
                 meta.chat_token = data.token;

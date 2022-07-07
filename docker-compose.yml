@@ -1,0 +1,12 @@
+# Use root/example as user/password credentials
+version: '3.9'
+
+services:
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: 'otshellnick'
+      MONGO_INITDB_ROOT_PASSWORD: 'QaweRtv4241'
+    ports:
+      - '3948:27017'

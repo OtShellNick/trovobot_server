@@ -1,26 +1,31 @@
-const knex = require('../db');
+const {connect} = require('../db');
 const jwt = require('jsonwebtoken');
+
+let users;
+
+(async () => {
+    if(!users?.isConnected()) users = (await connect()).collection('users');
+})()
 
 const createUser = async (data) => {
     const newUser = {...data, role: 'user', jwt: jwt.sign(data.userId, process.env.SECRET_KEY)};
-    const [{id}] = await knex('user').insert(newUser).returning('id');
-    return {...newUser, id};
+    await users.insertOne(newUser);
+    return newUser;
 };
 
-const getUserByJwt = async (jwt) => {
-    return await knex('user').where({jwt});
-}
+const getUserByJwt = async (jwt) => await users.findOne({jwt});
 
-const getUserByUserId = async (userId) => {
-    return await knex('user').where({userId});
-}
+const getUserByUserId = async (userId) => await users.findOne({userId});
 
 const getUserByAccessToken = async (access_token) => {
-    return await knex('user').where({access_token});
+    return await users.findOne({access_token});
 }
 
 const updateUserByUserId = async (userId, data) => {
-    return await knex('user').where('userId', '=', userId).update(data, ['id', 'userId', 'userName', 'nickName', 'email', 'profilePic', 'info', 'channelId', 'access_token', 'token_type', 'expires_in', 'refresh_token', 'role', 'jwt']);
+    const {value} = await users.findOneAndUpdate({userId}, {$set: data}, {returnDocument: 'after'});
+    return value;
 }
 
-module.exports = {createUser, getUserByUserId, getUserByAccessToken, updateUserByUserId, getUserByJwt};
+const getAllUsers = async () => await users.countDocuments();
+
+module.exports = {createUser, getUserByUserId, getUserByAccessToken, updateUserByUserId, getUserByJwt, getAllUsers};

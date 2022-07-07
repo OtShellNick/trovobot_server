@@ -1,14 +1,19 @@
 require("dotenv").config();
 
-const knex = require("knex")({
-    client: "pg",
-    connection: {
-        host: process.env.DB_HOST,
-        port: process.env.DB_PORT || 5432,
-        database: process.env.DB_NAME,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-    },
+const { MongoClient, ObjectId } = require("mongodb");
+
+const client = new MongoClient(process.env.DB_URI, {
+    useUnifiedTopology: true,
 });
 
-module.exports = knex;
+module.exports = {
+    ObjectId,
+    client,
+    connect: async () => {
+        await client.connect();
+        return await client.db("users");
+    },
+    close: async () => {
+        await client.close();
+    }
+};

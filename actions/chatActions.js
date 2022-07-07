@@ -1,24 +1,30 @@
-const knex = require('../db');
+const {connect} = require('../db');
+
+let chatters = null;
+
+(async () => {
+    if(!chatters?.isConnected()) chatters = (await connect()).collection('chatters');
+})()
 
 const createChatter = async (data) => {
-    const [{id}] = await knex('chatters').insert(data).returning('id');
-    return {...data, id};
+    return await chatters.insertOne(data);
 }
 
-const updateChatter = async (sender_id, data) => {
-    return await knex('chatters').where('sender_id', '=', sender_id).update(data, ['id', 'sender_id', 'nick_name', 'roles', 'messages']);
+const updateChatter = async (sender_id, channelId, data) => {
+    const {value} = await chatters.findOneAndUpdate({sender_id, channelId}, {$set: data}, {returnDocument: 'after'});
+    return value;
 }
 
 const getChatterByChatterId = async (sender_id) => {
-    return await knex('chatters').where({sender_id});
+    return await chatters.findOne({sender_id});
 }
 
 const getChattersWithMaxMessages = async () => {
-    return await knex('chatters').orderBy('messages', 'desc', 'first');
+    return await chatters.find().sort({messages: -1}).limit(1);
 }
 
 const getChattersWithRole = async (role) => {
-    return await knex('chatters').where('roles', '@>', [`${role}`]);
+    return await chatters.find({roles: {$all: [`${role}`]}}).limit(1);
 }
 
 module.exports = {createChatter, updateChatter, getChattersWithMaxMessages, getChatterByChatterId, getChattersWithRole}

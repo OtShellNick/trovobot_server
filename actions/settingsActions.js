@@ -1,15 +1,20 @@
-const knex = require('../db');
+const {connect} = require('../db');
 
-const getSettingsByUserId = async (userId) => {
-    return await knex('settings').where({userId});
-};
+let settings = null;
+
+(async () => {
+    if(!settings?.isConnected()) settings = (await connect()).collection('settings');
+})()
+
+const getSettingsByUserId = async (userId) => await settings.findOne({userId});
 
 const updateSettings = async (userId, data) => {
-    return await knex('settings').where({userId}).update(data, ['id', 'userId', 'botOn']);
+    const {value} = await settings.findOneAndUpdate({userId}, {$set: data}, {returnDocument: 'after'});
+    return value;
 };
 
 const createSettings = async (userId, data) => {
-    return await knex('settings').insert({userId, ...data});
+    return await settings.insertOne({userId, ...data});
 }
 
 module.exports = {getSettingsByUserId, createSettings, updateSettings}

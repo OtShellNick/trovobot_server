@@ -1,6 +1,5 @@
 const ApiGateway = require("moleculer-web");
-const SocketIOService = require("moleculer-io");
-const context = require('moleculer-cls');
+const {Errors: {MoleculerError}} = require('moleculer');
 const E = require("moleculer-web").Errors;
 const cors = require('cors');
 const cookieParser = require("cookie-parser");
@@ -9,34 +8,50 @@ const {getUserByJwt} = require("../actions/userActions");
 module.exports = {
     name: 'api',
     version: 1,
-    mixins: [ApiGateway, SocketIOService],
+    mixins: [ApiGateway],
     settings: {
+        path: 'api/',
         origin: '*',
         methods: ["GET", "OPTIONS", "POST", "PUT", "DELETE"],
         use: [cors(), cookieParser()],
         port: process.env.SERVER_PORT,
         routes: [
             {
-                path: '/trovo/',
+                path: '/auth',
                 whiteList: ['auth.*'],
+                authorization: false,
+                aliases: {
+                    "GET /count": "v1.auth.count",
+                    "POST /login": "v1.auth.login",
+                    "POST /logout": "v1.auth.logout",
+                    "POST /bot": "v1.auth.bot",
+                    "POST /disconnect": "v1.auth.disconnect",
+                },
                 bodyParser: {
                     json: true,
                     urlencoded: {extended: true}
                 }
             },
             {
-                path: '/trovo/user',
-                whiteList: ['user.*', 'chat.*'],
+                path: '/users',
+                whiteList: ['user.*'],
                 authorization: true,
+                aliases: {
+                    "GET /me": "v1.user.me",
+                },
                 bodyParser: {
                     json: true,
                     urlencoded: {extended: true}
                 }
             },
             {
-                path: '/trovo/settings',
+                path: '/settings',
                 whiteList: ['settings.*'],
                 authorization: true,
+                aliases: {
+                    "GET /get": "v1.settings.get",
+                    "POST /update": "v1.settings.update",
+                },
                 bodyParser: {
                     json: true,
                     urlencoded: {extended: true}
@@ -49,9 +64,10 @@ module.exports = {
             const {authorization} = req.headers;
 
             if (authorization) {
-                const [user] = await getUserByJwt(authorization);
+                const user = await getUserByJwt(authorization);
 
-                ctx.meta.user = user;
+                if (!user) throw new MoleculerError('Unauthorized', 401);
+                if (user) ctx.meta.user = user;
 
                 return Promise.resolve(ctx);
             }

@@ -11,8 +11,7 @@ module.exports = {
                 const {user} = meta;
 
                 try {
-                    const [settings] = await getSettingsByUserId(user.userId);
-                    return settings;
+                    return await getSettingsByUserId(user.userId);
                 } catch (e) {
                     console.log('get settings error', e);
                     throw new MoleculerError('Internal server error', 500);
@@ -28,7 +27,7 @@ module.exports = {
                 const {botOn} = params;
 
                 try {
-                    const [settings] = await updateSettings(user.userId, {botOn});
+                    const settings = await updateSettings(user.userId, {botOn});
 
                     settings.botOn ? await chatConnect(user) : chatDisconnect(user);
 
