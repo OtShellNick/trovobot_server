@@ -5,9 +5,7 @@ const {
     updateChatter, getChattersWithRole
 } = require("../actions/chatActions");
 const {refreshToken} = require("./auth");
-const {updateUserByUserId} = require("../actions/userActions");
-const {getBotById, updateBotByUserId} = require("../actions/botActions");
-const {getSettingsByUserId} = require("../actions/settingsActions");
+const {updateUserByUserId, getUserByUserId} = require("../actions/userActions");
 const WebSocketClient = require('websocket').w3cwebsocket;
 let interval = 0;
 const map = new Map();
@@ -17,11 +15,11 @@ const getSelfChatToken = (access_token) => Server('get', 'chat/token', {}, acces
 const getChatToken = (access_token, channelId) => Server('get', `chat/channel-token/${channelId}`, {}, access_token);
 
 const setBotForUser = async user => {
-    if (!user.customBot) {
-        return await getBotById('62c6d66f1bf861b860f594f4');
+    if (!user.sendSelf) {
+        return await getUserByUserId('110378567');
     }
 
-    return await getBotById(user.customBot);
+    return user;
 }
 
 const checkChatter = async ({nick_name, sender_id, roles, channelId}) => {
@@ -56,7 +54,7 @@ const sendChatCommand = (access_token, command, channel_id) => Server('post', 'c
 
 const messagesHandler = (data, socket, user, chatBot) => {
     const {access_token, refresh_token, userId} = chatBot;
-    const sendAction = user.userName === chatBot.userName ? sendSelfMessage : sendMessage;
+    const sendAction = user.sendSelf ? sendSelfMessage : sendMessage;
 
     switch (data.type) {
         case 'CHAT':
@@ -64,7 +62,7 @@ const messagesHandler = (data, socket, user, chatBot) => {
 
             if (chats.length < 50) chats.forEach(async (msgs) => {
                 const {type, nick_name, content, sender_id, roles} = msgs;
-                const settings = await getSettingsByUserId(user.userId);
+                console.log(msgs)
 
                 let message = '';
 
@@ -73,8 +71,18 @@ const messagesHandler = (data, socket, user, chatBot) => {
                         const chatter = await checkChatter({nick_name, sender_id, roles, channelId: user.channelId});
                         let updatedChatter = await addMessageToChatter(chatter);
 
-                        settings.triggers.map(trigger => {
-                            if(trigger.command === content) sendAction(access_token, trigger.message, user.channelId);
+                        user.triggers.map(async (trigger) => {
+                            if(trigger.command === content) {
+                                try {
+                                    await sendAction(access_token, trigger.message, user.channelId);
+                                } catch (e) {
+                                    console.log('error send trigger message', e);
+                                    const {data: authData} = await refreshToken(refresh_token);
+                                    const newBot = await updateUserByUserId(userId, authData);
+                                    await sendAction(newBot.access_token, message, user.channelId);
+                                    chatRestart(user);
+                                }
+                            }
                         })
 
                         // const chatterWithRole = await getChattersWithRole('Достоевский');
@@ -105,7 +113,7 @@ const messagesHandler = (data, socket, user, chatBot) => {
                         } catch (e) {
                             console.log('error send welcome message', e);
                             const {data: authData} = await refreshToken(refresh_token);
-                            const newBot = await updateBotByUserId(userId, authData);
+                            const newBot = await updateUserByUserId(userId, authData);
                             await sendAction(newBot.access_token, message, user.channelId);
                             chatRestart(user);
                         }
@@ -117,7 +125,7 @@ const messagesHandler = (data, socket, user, chatBot) => {
                         } catch (e) {
                             console.log('error send follow message', e);
                             const {data: authData} = await refreshToken(refresh_token);
-                            const newBot = await updateBotByUserId(userId, authData);
+                            const newBot = await updateUserByUserId(userId, authData);
                             await sendAction(newBot.access_token, message, user.channelId);
                             chatRestart(user);
                         }
@@ -144,10 +152,11 @@ const pingHandler = (sec, socket) => {
 }
 
 const chatConnect = async (user) => {
+    console.log('chatConnect', user)
     const chatBot = await setBotForUser(user);
 
     try {
-        const action = user.userName === chatBot.userName ? getSelfChatToken : getChatToken;
+        const action = user.sendSelf ? getSelfChatToken : getChatToken;
 
         const {data: {token}} = await action(chatBot.access_token, user.channelId);
         chat(token, user, chatBot);
@@ -156,7 +165,7 @@ const chatConnect = async (user) => {
 
         console.log('error connect to chat', String(e));
         const {data: authData} = await refreshToken(chatBot.refresh_token);
-        await updateBotByUserId(chatBot.userId, authData);
+        await updateUserByUserId(chatBot.userId, authData);
         chatConnect(user);
 
     }
@@ -209,4 +218,4 @@ const chat = (access_token, user, chatBot) => {
     });
 }
 
-module.exports = {getChatToken, chat, sendChatCommand, sendMessage, chatConnect, chatDisconnect, getSelfChatToken, sendSelfMessage}
+module.exports = {getChatToken, chat, sendChatCommand, sendMessage, chatConnect, chatDisconnect, getSelfChatToken, sendSelfMessage, chatRestart}

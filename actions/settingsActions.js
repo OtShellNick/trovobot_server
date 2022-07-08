@@ -1,4 +1,5 @@
 const {connect} = require('../db');
+const {chatConnect, chatDisconnect, chatRestart} = require("../requests/chat");
 
 let settings = null;
 
@@ -17,4 +18,20 @@ const createSettings = async (userId, data) => {
     return await settings.insertOne({userId, ...data});
 }
 
-module.exports = {getSettingsByUserId, createSettings, updateSettings}
+const settingsUpdateAction = async (user, settings) => {
+    const {botOn, sendSelf} = settings;
+
+    if(user.botOn !== botOn) {
+        if(botOn) {
+            await chatConnect({...user, ...settings});
+        } else {
+            await chatDisconnect({...user, ...settings});
+        }
+    }
+
+    if(user.botOn && user.sendSelf !== sendSelf) {
+        await chatRestart({...user, ...settings});
+    }
+}
+
+module.exports = {getSettingsByUserId, createSettings, updateSettings, settingsUpdateAction}

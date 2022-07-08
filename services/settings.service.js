@@ -1,35 +1,24 @@
 const {Errors: {MoleculerError}} = require('moleculer');
-const {getSettingsByUserId, updateSettings} = require("../actions/settingsActions");
-const {chatConnect, chatDisconnect} = require("../requests/chat");
+const {updateSettings, settingsUpdateAction} = require("../actions/settingsActions");
 
 module.exports = {
     name: 'settings',
     version: 1,
     actions: {
-        get: {
-            handler: async ({meta}) => {
-                const {user} = meta;
-
-                try {
-                    return await getSettingsByUserId(user.userId);
-                } catch (e) {
-                    console.log('get settings error', e);
-                    throw new MoleculerError('Internal server error', 500);
-                }
-            }
-        },
         update: {
             params: {
-                botOn: {type: 'boolean', optional: true}
+                botOn: {type: 'boolean', optional: false},
+                sendSelf: {type: 'boolean', optional: false},
             },
             handler: async ({params, meta}) => {
                 const {user} = meta;
-                const {botOn} = params;
+                const {botOn, sendSelf} = params;
 
+                console.log('update settings', params);
                 try {
-                    const settings = await updateSettings(user.userId, {botOn});
+                    const settings = await updateSettings(user.userId, {botOn, sendSelf});
 
-                    settings.botOn ? await chatConnect(user) : chatDisconnect(user);
+                   await settingsUpdateAction(user, settings);
 
                     return settings;
                 } catch (e) {

@@ -4,6 +4,7 @@ const E = require("moleculer-web").Errors;
 const cors = require('cors');
 const cookieParser = require("cookie-parser");
 const {getUserByJwt} = require("../actions/userActions");
+const {getSettingsByUserId} = require("../actions/settingsActions");
 
 module.exports = {
     name: 'api',
@@ -65,9 +66,10 @@ module.exports = {
 
             if (authorization) {
                 const user = await getUserByJwt(authorization);
+                const userSettings = await getSettingsByUserId(user.userId);
 
                 if (!user) throw new MoleculerError('Unauthorized', 401);
-                if (user) ctx.meta.user = user;
+                if (user) ctx.meta.user = {...user, ...userSettings};
 
                 return Promise.resolve(ctx);
             }
