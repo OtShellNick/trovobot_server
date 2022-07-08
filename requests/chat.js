@@ -158,8 +158,12 @@ const chatConnect = async (user) => {
     try {
         const action = user.sendSelf ? getSelfChatToken : getChatToken;
 
-        const {data: {token}} = await action(chatBot.access_token, user.channelId);
-        chat(token, user, chatBot);
+        try {
+            const {data: {token}} = await action(chatBot.access_token, user.channelId);
+            chat(token, user, chatBot);
+        } catch (e) {
+            console.log('error connect to chat', String(e));
+        }
 
     } catch (e) {
 
