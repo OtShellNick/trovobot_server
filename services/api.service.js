@@ -63,7 +63,7 @@ module.exports = {
     methods: {
         authorize: async (ctx, route, req) => {
             const {authorization} = req.headers;
-console.log('authorize', authorization);
+
             if (authorization) {
                 const user = await getUserByJwt(authorization);
                 const userSettings = await getSettingsByUserId(user.userId);
