@@ -41,7 +41,10 @@ const addMessageToChatter = async (chatter) => await updateChatter(chatter.sende
 
 const sendSelfMessage = (access_token, msg) => Server('post', 'chat/send', {content: msg}, access_token);
 
-const sendMessage = (access_token, msg, channelId) => Server('post', 'chat/send', {content: msg, channel_id: channelId}, access_token);
+const sendMessage = (access_token, msg, channelId) => Server('post', 'chat/send', {
+    content: msg,
+    channel_id: channelId
+}, access_token);
 
 const sendChatCommand = (access_token, command, channel_id) => Server('post', 'channels/command', {
     command,
@@ -72,7 +75,7 @@ const messagesHandler = (data, socket, user, chatBot) => {
                         let updatedChatter = await addMessageToChatter(chatter);
 
                         user.triggers.map(async (trigger) => {
-                            if(trigger.command === content) {
+                            if (trigger.command === content) {
                                 try {
                                     await sendAction(access_token, trigger.message, user.channelId);
                                 } catch (e) {
@@ -157,13 +160,8 @@ const chatConnect = async (user) => {
 
     try {
         const action = user.sendSelf ? getSelfChatToken : getChatToken;
-
-        try {
-            const {data: {token}} = await action(chatBot.access_token, user.channelId);
-            chat(token, user, chatBot);
-        } catch (e) {
-            console.log('error connect to chat', String(e));
-        }
+        const {data: {token}} = await action(chatBot.access_token, user.channelId);
+        chat(token, user, chatBot);
 
     } catch (e) {
 
@@ -222,4 +220,14 @@ const chat = (access_token, user, chatBot) => {
     });
 }
 
-module.exports = {getChatToken, chat, sendChatCommand, sendMessage, chatConnect, chatDisconnect, getSelfChatToken, sendSelfMessage, chatRestart}
+module.exports = {
+    getChatToken,
+    chat,
+    sendChatCommand,
+    sendMessage,
+    chatConnect,
+    chatDisconnect,
+    getSelfChatToken,
+    sendSelfMessage,
+    chatRestart
+}
