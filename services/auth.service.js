@@ -48,15 +48,14 @@ module.exports = {
 
                 try {
                     const finedUser = await getUserByJwt(jwt);
-                    await revokeToken(finedUser.access_token);
+                    if(finedUser) await revokeToken(finedUser.access_token);
+                    return 'Success';
                 } catch (e) {
                     console.log('error logout', e);
                     if (e.response.data.status === 11714) return 'Success';
 
                     throw new MoleculerError('Internal server error', 500);
                 }
-
-                return 'Success';
             }
         },
         count: {
