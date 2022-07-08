@@ -10,3 +10,8 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: 'QaweRtv4241'
     ports:
       - '3948:27017'
+  server:
+    build: .
+    restart: always
+    ports:
+      - '4112:4112'
