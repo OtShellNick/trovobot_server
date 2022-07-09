@@ -168,7 +168,7 @@ const chatConnect = async (user) => {
         console.log('error connect to chat', String(e));
         const {data: authData} = await refreshToken(chatBot.refresh_token);
         await updateUserByUserId(chatBot.userId, authData);
-        chatConnect(user);
+        await chatRestart(user);
 
     }
 }
