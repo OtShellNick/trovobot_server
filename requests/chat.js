@@ -173,16 +173,17 @@ const chatConnect = async (user) => {
     }
 }
 
-const chatDisconnect = (user) => {
+const chatDisconnect = async (user) => {
     const client = map.get(user.userId);
     if (interval) clearInterval(interval);
-    if (client) client.close();
+    if (client) await client.close();
     interval = 0;
 }
 
-const chatRestart = (user) => {
-    chatDisconnect(user);
-    chatConnect(user);
+const chatRestart = async (user) => {
+    const newUser = await getUserByUserId(user.userId);
+    await chatDisconnect(user);
+    await chatConnect(newUser);
 }
 
 const chat = (access_token, user, chatBot) => {
