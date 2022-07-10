@@ -15,3 +15,8 @@ services:
     restart: always
     ports:
       - '4112:4112'
+  client:
+    build: ../trovo-bot-front/.
+    restart: always
+    ports:
+      - '80:80'
