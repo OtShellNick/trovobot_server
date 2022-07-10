@@ -83,7 +83,7 @@ const messagesHandler = (data, socket, user, chatBot) => {
                                     const {data: authData} = await refreshToken(refresh_token);
                                     const newBot = await updateUserByUserId(userId, authData);
                                     await sendAction(newBot.access_token, message, user.channelId);
-                                    chatRestart(user);
+                                    await chatRestart(user);
                                 }
                             }
                         })
@@ -118,19 +118,19 @@ const messagesHandler = (data, socket, user, chatBot) => {
                             const {data: authData} = await refreshToken(refresh_token);
                             const newBot = await updateUserByUserId(userId, authData);
                             await sendAction(newBot.access_token, message, user.channelId);
-                            chatRestart(user);
+                            await chatRestart(user);
                         }
                         break;
                     case 5003:
                         message = `@${nick_name} спасибо за подписку! :purpleheart Добро пожаловать в семью!`
                         try {
-                            sendMessage(access_token, message);
+                            await sendAction(access_token, message, user.channelId);
                         } catch (e) {
                             console.log('error send follow message', e);
                             const {data: authData} = await refreshToken(refresh_token);
                             const newBot = await updateUserByUserId(userId, authData);
                             await sendAction(newBot.access_token, message, user.channelId);
-                            chatRestart(user);
+                            await chatRestart(user);
                         }
                 }
             });
@@ -181,9 +181,13 @@ const chatDisconnect = async (user) => {
 }
 
 const chatRestart = async (user) => {
-    const newUser = await getUserByUserId(user.userId);
-    await chatDisconnect(user);
-    await chatConnect(newUser);
+    try {
+        const newUser = await getUserByUserId(user.userId);
+        await chatDisconnect(user);
+        await chatConnect(newUser);
+    } catch (e) {
+        console.log('error restart chat', e);
+    }
 }
 
 const chat = (access_token, user, chatBot) => {
