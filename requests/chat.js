@@ -57,6 +57,7 @@ const sendChatCommand = (access_token, command, channel_id) => Server('post', 'c
 
 const messagesHandler = (data, socket, user, chatBot) => {
     const {access_token, refresh_token, userId} = chatBot;
+    console.log('chat bot', chatBot);
     const sendAction = user.sendSelf ? sendSelfMessage : sendMessage;
 
     switch (data.type) {
