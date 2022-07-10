@@ -3,7 +3,7 @@ const config = {
         rest: 'http://192.168.31.37:8088/'
     },
     prod: {
-        rest: 'https://trovo-bot-front.herokuapp.com/'
+        rest: 'http://151.248.118.164/'
     }
 }
 
