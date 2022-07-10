@@ -19,4 +19,4 @@ services:
     build: ../trovo-bot-front/.
     restart: always
     ports:
-      - '80:80'
+      - '5782:80'
