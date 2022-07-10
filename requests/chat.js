@@ -6,6 +6,7 @@ const {
 } = require("../actions/chatActions");
 const {refreshToken} = require("./auth");
 const {updateUserByUserId, getUserByUserId} = require("../actions/userActions");
+const {getSettingsByUserId} = require("../actions/settingsActions");
 const WebSocketClient = require('websocket').w3cwebsocket;
 let interval = 0;
 const map = new Map();
@@ -184,8 +185,9 @@ const chatDisconnect = async (user) => {
 const chatRestart = async (user) => {
     try {
         const newUser = await getUserByUserId(user.userId);
+        const settings = await getSettingsByUserId(newUser.userId);
         await chatDisconnect(user);
-        await chatConnect(newUser);
+        await chatConnect({...newUser, ...settings});
     } catch (e) {
         console.log('error restart chat', e);
     }
