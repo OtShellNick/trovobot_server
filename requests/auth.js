@@ -10,13 +10,6 @@ const login = (code) => Server('post', 'exchangetoken', {
     redirect_uri: config[MODE].rest
 });
 
-const loginBot = (code) => Server('post', 'exchangetoken', {
-    client_secret: SECRET_KEY,
-    grant_type: "authorization_code",
-    code,
-    redirect_uri: `${config[MODE].rest}settings/`
-});
-
 const validateToken = (token) => Server('get', 'validate', {}, token);
 
 const revokeToken = token => Server('post', 'revoke', {access_token: token}, token);
@@ -27,4 +20,4 @@ const refreshToken = refresh_token => Server('post', 'refreshtoken', {
         refresh_token
     });
 
-module.exports = {login, loginBot, validateToken, revokeToken, refreshToken}
+module.exports = {login, validateToken, revokeToken, refreshToken}

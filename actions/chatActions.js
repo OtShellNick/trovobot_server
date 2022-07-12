@@ -1,4 +1,5 @@
 const {connect} = require('../db');
+const {Server} = require("../helpers/server");
 
 let chatters = null;
 
@@ -27,4 +28,15 @@ const getChattersWithRole = async (role) => {
     return await chatters.find({roles: {$all: [`${role}`]}}).limit(1);
 }
 
-module.exports = {createChatter, updateChatter, getChattersWithMaxMessages, getChatterByChatterId, getChattersWithRole}
+const getSelfChatToken = (access_token) => Server('get', 'chat/token', {}, access_token);
+
+const getChatToken = (access_token, channelId) => Server('get', `chat/channel-token/${channelId}`, {}, access_token);
+
+const sendSelfMessage = (access_token, msg) => Server('post', 'chat/send', {content: msg}, access_token);
+
+const sendMessage = (access_token, msg, channelId) => Server('post', 'chat/send', {
+    content: msg,
+    channel_id: channelId
+}, access_token);
+
+module.exports = {createChatter, updateChatter, getChattersWithMaxMessages, getChatterByChatterId, getChattersWithRole, getChatToken, getSelfChatToken, sendMessage, sendSelfMessage};

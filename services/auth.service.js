@@ -2,7 +2,6 @@ const {login, revokeToken} = require('../requests/auth');
 const {Errors: {MoleculerError}} = require('moleculer');
 const {getUserInfo} = require('../requests/user');
 const {createUser, getUserByUserId, updateUserByUserId, getUserByJwt, getAllUsers} = require('../actions/userActions');
-const {createSettings} = require("../actions/settingsActions");
 const {TRIGGERS} = require("../Defaults/defaultTriggers");
 
 module.exports = {
@@ -28,8 +27,8 @@ module.exports = {
                         return updatedUser.jwt;
                     }
 
-                    const createdUser = await createUser({...user, ...authData});
-                    await createSettings(createdUser.userId, {botOn: false, sendSelf: false, triggers: [...TRIGGERS]});
+                    const settings = {botOn: false, sendSelf:false, triggers: TRIGGERS};
+                    const createdUser = await createUser({...user, ...authData, settings});
 
                     meta.user = createdUser;
                     return createdUser.jwt;

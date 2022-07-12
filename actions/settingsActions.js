@@ -1,37 +1,35 @@
-const {connect} = require('../db');
-const {chatConnect, chatDisconnect, chatRestart} = require("../requests/chat");
+const {Bot} = require("../helpers/chat");
 
-let settings = null;
+const BOTS = new Map();
 
-(async () => {
-    if(!settings?.isConnected()) settings = (await connect()).collection('settings');
-})()
 
-const getSettingsByUserId = async (userId) => await settings.findOne({userId});
-
-const updateSettings = async (userId, data) => {
-    const {value} = await settings.findOneAndUpdate({userId}, {$set: data}, {returnDocument: 'after'});
-    return value;
-};
-
-const createSettings = async (userId, data) => {
-    return await settings.insertOne({userId, ...data});
-}
-
-const settingsUpdateAction = async (user, settings) => {
+const updateSettings = async (user, settings) => {
     const {botOn, sendSelf} = settings;
 
-    if(user.botOn !== botOn) {
-        if(botOn) {
-            await chatConnect({...user, ...settings});
-        } else {
-            await chatDisconnect({...user, ...settings});
+    if(botOn && !BOTS.has(user.userId)) {
+        const bot = new Bot({...user, settings});
+        await bot.start();
+        BOTS.set(user.userId, bot);
+    } else {
+        const bot = BOTS.get(user.userId);
+        if(bot) {
+            await bot.stop();
+            BOTS.delete(user.userId);
         }
     }
 
-    if(user.botOn && user.sendSelf !== sendSelf) {
-        await chatRestart({...user, ...settings});
+    if(botOn && sendSelf !== user.settings.sendSelf) {
+        const bot = BOTS.get(user.userId);
+
+        if(bot) {
+            await bot.stop();
+            BOTS.delete(user.userId);
+        }
+
+        const newBot = new Bot({...user, settings});
+        await newBot.start();
+        BOTS.set(user.userId, newBot);
     }
 }
 
-module.exports = {getSettingsByUserId, createSettings, updateSettings, settingsUpdateAction}
+module.exports = {updateSettings};
