@@ -19,6 +19,13 @@ const TRIGGERS = [
         command: null,
         action: 'welcome',
         message: '@{nickName} добро пожаловать на канал! :shocked Устраивайся по удобнее, приятного просмотра)'
+    },
+    {
+        name: 'follow',
+        description: 'follow',
+        command: null,
+        action: 'follow',
+        message: '@{nickName} спасибо за подписку! :purpleheart Добро пожаловать в семью!'
     }
 ];
 

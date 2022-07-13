@@ -6,6 +6,8 @@ const BOTS = new Map();
 const updateSettings = async (user, settings) => {
     const {botOn, sendSelf} = settings;
 
+    console.log(BOTS.keys());
+
     if (botOn) {
         if(!BOTS.has(user.userId)) {
             const bot = new Bot({...user, settings});

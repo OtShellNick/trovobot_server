@@ -124,7 +124,7 @@ class Bot {
                 const welcomeMessage = trigger.message.replace('{nickName}', nick_name);
                 await this.#sendMessage(welcomeMessage);
             } else if (trigger.action === 'follow') {
-               const followMessage = `@${nick_name} спасибо за подписку! :purpleheart Добро пожаловать в семью!`;
+               const followMessage = trigger.message.replace('{nickName}', nick_name);
                await this.#sendMessage(followMessage);
             }
         });
@@ -178,9 +178,9 @@ class Bot {
     }
 
     async stop() {
+        this.client.onclose = () => Promise.resolve('closed');
         this.client.close();
         clearInterval(this.pongInterval);
-        console.log('bot stopped');
     }
 
     async restart() {
