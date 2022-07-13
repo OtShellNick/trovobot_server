@@ -178,7 +178,7 @@ class Bot {
     }
 
     async stop() {
-        this.client.onclose = () => Promise.resolve('closed');
+        this.client.onclose = () => console.log('closed');
         this.client.close();
         clearInterval(this.pongInterval);
     }
