@@ -1,10 +1,21 @@
 const {updateUserByUserId} = require("../actions/userActions");
 const {Errors: {MoleculerError}} = require('moleculer');
 const {updateSettings} = require("../actions/settingsActions");
+const {connect} = require('../db');
 
 module.exports = {
     name: 'user',
     version: 1,
+    started: async () => {
+        try {
+            const users = await (await connect()).collection('users').find({}).toArray();
+            users.forEach(user => {
+                updateSettings(user, user.settings);
+            });
+        } catch(e) {
+            console.log('error start bots', e);
+        }
+    },
     actions: {
         me: {
             handler: async ({meta}) => {
