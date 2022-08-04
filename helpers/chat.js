@@ -1,4 +1,5 @@
 const {getUserByUserId, updateUserByUserId} = require("../actions/userActions");
+const {Errors: {MoleculerError}} = require('moleculer');
 const {
     getSelfChatToken,
     getChatToken,
@@ -34,9 +35,14 @@ class Bot {
             this.chatToken = token;
         } catch (e) {
             console.log('error set token', e);
-            const {data: authData} = await refreshToken(refresh_token);
-            this.user = await updateUserByUserId(userId, authData);
-            await this.#setChatToken();
+            try {
+                const {data: authData} = await refreshToken(refresh_token);
+                this.user = await updateUserByUserId(userId, authData);
+                await this.#setChatToken();
+            } catch (e) {
+                console.log('error refresh token', e);
+                throw new MoleculerError('Error refresh token', 401);
+            }
         }
     }
 
@@ -72,7 +78,7 @@ class Bot {
                     break;
                 case "CHAT":
                     const {chats} = data;
-                    if (chats.length < 3) this.#messageHandler(chats);
+                    if (chats.length < 50) this.#messageHandler(chats);
                     break;
             }
         }
