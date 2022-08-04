@@ -72,7 +72,7 @@ class Bot {
                     break;
                 case "CHAT":
                     const {chats} = data;
-                    if (chats.length < 50) this.#messageHandler(chats);
+                    if (chats.length < 3) this.#messageHandler(chats);
                     break;
             }
         }
