@@ -1,7 +1,7 @@
 const {login, revokeToken} = require('../requests/auth');
 const {Errors: {MoleculerError}} = require('moleculer');
 const {getUserInfo} = require('../requests/user');
-const {createUser, getUserByUserId, updateUserByUserId, getUserByJwt, getAllUsers} = require('../actions/userActions');
+const {createUser, getUserByUserId, updateUserByUserId, getUserByJwt, getAllUsers, generateJwt} = require('../actions/userActions');
 const {TRIGGERS} = require("../Defaults/defaultTriggers");
 
 module.exports = {
@@ -21,7 +21,8 @@ module.exports = {
                     const finedUser = await getUserByUserId(user.userId);
 
                     if (finedUser) {
-                        const updatedUser = await updateUserByUserId(finedUser.userId, authData);
+                        const jwt = generateJwt(finedUser.userId);
+                        const updatedUser = await updateUserByUserId(finedUser.userId, {...authData, jwt});
 
                         meta.user = updatedUser;
                         return updatedUser.jwt;
