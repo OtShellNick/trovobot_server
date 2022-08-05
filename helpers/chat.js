@@ -1,5 +1,4 @@
 const {getUserByUserId, updateUserByUserId} = require("../actions/userActions");
-const {Errors: {MoleculerError}} = require('moleculer');
 const {
     getSelfChatToken,
     getChatToken,
@@ -41,7 +40,7 @@ class Bot {
                 await this.#setChatToken();
             } catch (e) {
                 console.log('error refresh token', e);
-                throw new MoleculerError('Error refresh token', 401);
+                await updateUserByUserId(userId, {jwt: ''});
             }
         }
     }
